@@ -12,6 +12,7 @@ import { Navbar } from '@/components/Navbar';
 import { BookingForm } from '@/components/BookingForm';
 import { Footer } from '@/components/Footer';
 import { PageBackground } from '@/components/PageBackground';
+import { upcomingClasses } from '@/data/upcomingClasses';
 
 const Booking = () => {
   const pageRef = useRef<HTMLDivElement>(null);

@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Mail, Phone, MapPin, Send, MessageSquare, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
-
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import contactInfo from '@/data/contactInfo';
+
 import { Textarea } from '@/components/ui/textarea';
 import { PageBackground } from '@/components/PageBackground';
 
@@ -90,63 +91,57 @@ const Contact = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Contact Information */}
             <div>
-              <div className="glass-card rounded-xl p-6 sticky top-24">
-                <h2 className="text-xl font-bold mb-6 text-gray-900">Get in Touch</h2>
-                
-                <div className="space-y-6">
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-full bg-tech-100 p-3 text-tech-600 flex-shrink-0">
-                      <Mail size={20} />
+              <div className="glass-card rounded-xl p-6 sticky top-24">                
+                <h2 className="text-xl font-bold mb-6 text-gray-900">{contactInfo.heading}</h2>                
+                  <div className="space-y-6">
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-full bg-tech-100 p-3 text-tech-600 flex-shrink-0">
+                        <Mail size={20} />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900">Email Us</h3>
+                        <p className="text-sm text-gray-600">
+                          For general inquiries:<br />
+                          <a href={`mailto:${contactInfo.email.general}`} className="text-tech-600 hover:underline">
+                            {contactInfo.email.general}
+                          </a><br />
+                          For training bookings:<br />
+                          <a href={`mailto:${contactInfo.email.booking}`} className="text-tech-600 hover:underline">
+                            {contactInfo.email.booking}
+                          </a>
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900">Email Us</h3>
-                      <p className="text-sm text-gray-600">
-                        For general inquiries:<br />
-                        <a href="mailto:contact@techinteach.com" className="text-tech-600 hover:underline">
-                          contact@techinteach.com
-                        </a><br />
-                        For training bookings:<br />
-                        <a href="mailto:training@techinteach.com" className="text-tech-600 hover:underline">
-                          training@techinteach.com
-                        </a>
-                      </p>
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-full bg-tech-100 p-3 text-tech-600 flex-shrink-0">
+                        <Phone size={20} />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900">Call Us</h3>
+                        <p className="text-sm text-gray-600">
+                          Main Office:<br />
+                          <a href={`tel:${contactInfo.call.main}`} className="text-tech-600 hover:underline">
+                            {contactInfo.call.main}
+                          </a><br />
+                          Training Department:<br />
+                          <a href={`tel:${contactInfo.call.training}`} className="text-tech-600 hover:underline">
+                            {contactInfo.call.training}
+                          </a>
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-full bg-tech-100 p-3 text-tech-600 flex-shrink-0">
-                      <Phone size={20} />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900">Call Us</h3>
-                      <p className="text-sm text-gray-600">
-                        Main Office:<br />
-                        <a href="tel:+918756429310" className="text-tech-600 hover:underline">
-                          +91 8756 429 310
-                        </a><br />
-                        Training Department:<br />
-                        <a href="tel:+918756429311" className="text-tech-600 hover:underline">
-                          +91 8756 429 311
-                        </a>
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-full bg-tech-100 p-3 text-tech-600 flex-shrink-0">
-                      <MapPin size={20} />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900">Visit Us</h3>
-                      <p className="text-sm text-gray-600">
-                        TechinTeach Training Center<br />
-                        Infopark, Kakkanad<br />
-                        Kochi, Kerala 682042<br />
-                        India
-                      </p>
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-full bg-tech-100 p-3 text-tech-600 flex-shrink-0">
+                        <MapPin size={20} />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900">Visit Us</h3>
+                        <p className="text-sm text-gray-600">{contactInfo.address.lines.map((line, index) => (
+                          <span key={index}>{line}<br /></span>
+                        ))}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
               </div>
               
             </div>

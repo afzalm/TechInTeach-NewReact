@@ -36,6 +36,7 @@ interface Program {
   slug: string;
   category: string;
   featured?: boolean;
+  image: string;
 }
 
 interface Category {
@@ -44,139 +45,53 @@ interface Category {
   icon: JSX.Element;
 }
 
-// Data
-const trainingPrograms: Program[] = [
-  {
-    title: "Design Thinking for Educators",
-    description: "Master the design thinking process to create innovative solutions for classroom challenges.",
-    icon: <Brain size={24} />,
-    slug: "design-thinking",
-    category: "innovation"
-  },
-  {
-    title: "Creating Engaging Classrooms",
-    description: "Transform your classroom with modern technology integration and engagement techniques.",
-    icon: <Laptop size={24} />,
-    slug: "engaging-classrooms",
-    category: "technology",
-    featured: true
-  },
-  {
-    title: "Teaching Strategies with AI",
-    description: "Learn how to leverage AI tools to enhance learning outcomes and streamline tasks.",
-    icon: <BookOpen size={24} />,
-    slug: "ai-teaching",
-    category: "technology",
-    featured: true
-  },
-  {
-    title: "School Innovation Ambassador",
-    description: "Get guided preparation for the MoEd Government of India's School Innovation Ambassador program.",
-    icon: <Award size={24} />,
-    slug: "innovation-ambassador",
-    category: "innovation"
-  },
-  {
-    title: "Google Certified Educator",
-    description: "Comprehensive preparation for Google's Level 1 and Level 2 Educator certifications.",
-    icon: <Globe size={24} />,
-    slug: "google-certified",
-    category: "certification"
-  },
-  {
-    title: "Microsoft Educator",
-    description: "Expert training to help you become a Microsoft Certified Educator.",
-    icon: <Laptop size={24} />,
-    slug: "microsoft-educator",
-    category: "certification"
-  },
-  {
-    title: "Apple Teacher Program",
-    description: "Specialized training to help educators integrate Apple technology in the classroom.",
-    icon: <Laptop size={24} />,
-    slug: "apple-teacher",
-    category: "certification"
-  },
-  {
-    title: "Adobe Creative Educator",
-    description: "Learn to integrate digital creativity into your teaching with Adobe's educational tools.",
-    icon: <Lightbulb size={24} />,
-    slug: "adobe-creative",
-    category: "innovation"
-  },
-  {
-    title: "Digital Citizenship",
-    description: "Equipping teachers to model and teach responsible and safe online behavior.",
-    icon: <Shield size={24} />,
-    slug: "digital-citizenship",
-    category: "technology",
-    featured: true
-  },
-  {
-    title: "Inclusive Education",
-    description: "Using technology to cater to diverse learning needs and create equitable environments.",
-    icon: <Heart size={24} />,
-    slug: "inclusive-education",
-    category: "development"
-  },
-  {
-    title: "Blended Learning Strategies",
-    description: "Effectively combining face-to-face and online learning for enhanced flexibility.",
-    icon: <LayoutGrid size={24} />,
-    slug: "blended-learning",
-    category: "technology"
-  },
-  {
-    title: "Assessment Tools and Techniques",
-    description: "Leveraging technology for more efficient and effective assessment.",
-    icon: <LineChart size={24} />,
-    slug: "assessment-tools",
-    category: "technology"
-  },
-  {
-    title: "Creating Engaging Online Content",
-    description: "Designing dynamic and interactive digital learning materials.",
-    icon: <FileText size={24} />,
-    slug: "online-content",
-    category: "technology"
-  },
-  {
-    title: "Data-Driven Instruction",
-    description: "Using student data to inform teaching practices and track progress.",
-    icon: <BarChart size={24} />,
-    slug: "data-driven",
-    category: "technology"
-  },
-  {
-    title: "Teacher Wellness",
-    description: "Managing workload and well-being in a technology-rich environment.",
-    icon: <Smile size={24} />,
-    slug: "teacher-wellness",
-    category: "development"
-  },
-  {
-    title: "Coding for Educators",
-    description: "Introducing foundational concepts of coding and computational thinking.",
-    icon: <Code size={24} />,
-    slug: "computational-thinking",
-    category: "technology"
-  },
-  {
-    title: "Gamification in Education",
-    description: "Using game elements to increase student motivation and engagement.",
-    icon: <Gamepad2 size={24} />,
-    slug: "gamification",
-    category: "innovation"
-  },
-  {
-    title: "Presentation Skills for Educators",
-    description: "Techniques to deliver engaging and memorable presentations.",
-    icon: <Presentation size={24} />,
-    slug: "presentation-skills",
-    category: "development",
-    featured: true
+import { programsData } from '@/data/programs';
+
+// Helper function to generate a default icon
+const getDefaultIcon = (slug: string) => {
+  switch (slug) {
+    case "design-thinking": return <Brain size={24} />;
+    case "engaging-classrooms": return <Laptop size={24} />;
+    case "ai-teaching": return <BookOpen size={24} />;
+    case "innovation-ambassador": return <Award size={24} />;
+    case "google-certified": return <Globe size={24} />;
+    case "microsoft-educator": return <Laptop size={24} />;
+    case "apple-teacher": return <Laptop size={24} />;
+    case "adobe-creative": return <Lightbulb size={24} />;
+    case "digital-citizenship": return <Shield size={24} />;
+    case "inclusive-education": return <Heart size={24} />;
+    case "blended-learning": return <LayoutGrid size={24} />;
+    case "assessment-tools": return <LineChart size={24} />;
+    case "online-content": return <FileText size={24} />;
+    case "data-driven": return <BarChart size={24} />;
+    case "teacher-wellness": return <Smile size={24} />;
+    case "computational-thinking": return <Code size={24} />;
+    case "gamification": return <Gamepad2 size={24} />;
+    case "presentation-skills": return <Presentation size={24} />;
+    default: return <Star size={24} />; // Default icon
   }
-];
+};
+
+// Create a temporary array with basic program data
+const tempPrograms: { title: string; description: string; slug: string; image: string }[] = 
+  Object.entries(programsData).map(([slug, data]) => ({
+    title: data.title,
+    description: data.description,
+    slug,
+    image: data.image,
+  }));
+
+// Map over the temporary array to add icon, category, and featured properties
+const programs: Program[] = tempPrograms.map(program => {
+  const { slug } = program;
+  const originalData = (tempPrograms as any[]).find(p => p.slug === slug) || {};
+  return {
+    ...program,
+    icon: originalData.icon || getDefaultIcon(slug),
+    category: originalData.category || "general",
+    featured: originalData.featured || false,
+  };
+});
 
 const categories: Category[] = [
   { name: "All Programs", value: "all", icon: <Star size={16} /> },
@@ -230,13 +145,15 @@ const CategoryFilter = ({
 );
 
 const ProgramCard = ({ program }: { program: Program }) => (
-  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-    <div className="flex items-start gap-4">
-      <div className="rounded-full bg-blue-100 p-3 text-blue-600">
-        {program.icon}
-      </div>
-      <div>
-        <h3 className="text-xl font-bold mb-2">{program.title}</h3>
+  <div className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+    <img
+      src={program.image}
+      className="h-48 w-full object-cover rounded-t-xl"
+    />
+    <div className="p-6">
+      <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
+        {program.icon} {program.title}
+      </h3>
         <p className="text-gray-600 mb-4">{program.description}</p>
         <Link
           to={`/programs/${program.slug}`}
@@ -245,8 +162,9 @@ const ProgramCard = ({ program }: { program: Program }) => (
           Learn More
           <ArrowRight size={16} />
         </Link>
-      </div>
     </div>
+    
+    
   </div>
 );
 
@@ -255,7 +173,7 @@ const SpecialOfferCard = ({
   description, 
   icon, 
   link, 
-  gradient 
+  gradient
 }: { 
   title: string; 
   description: string; 
@@ -288,7 +206,7 @@ const Programs = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   
-  const filteredPrograms = trainingPrograms.filter(program => {
+  const filteredPrograms = programs.filter(program => {
     const matchesSearch = program.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          program.description.toLowerCase().includes(searchQuery.toLowerCase());
     
@@ -319,7 +237,7 @@ const Programs = () => {
       </section>
 
       {/* Featured Programs */}
-      <section className="py-16 px-4">
+      <section className="py-16 px-4 bg-gray-50">
         <div className="container mx-auto">
           <div className="max-w-3xl mx-auto text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Featured Programs</h2>
@@ -327,7 +245,7 @@ const Programs = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {trainingPrograms
+            { programs
               .filter(program => program.featured)
               .map((program, index) => (
                 <ProgramCard key={index} program={program} />
@@ -337,7 +255,7 @@ const Programs = () => {
       </section>
       
       {/* All Programs Section */}
-      <section className="py-16 px-4 bg-gray-50">
+      <section className="py-16 px-4 ">
         <div className="container mx-auto">
           <div className="max-w-3xl mx-auto text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">All Programs</h2>

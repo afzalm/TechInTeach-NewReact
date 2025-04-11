@@ -1,5 +1,5 @@
 
-import { useParams } from 'react-router-dom';
+import { useParams } from "react-router-dom";
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +9,7 @@ import { ProgramOutcomes } from '@/components/program/ProgramOutcomes';
 import { ProgramWhyTake } from '@/components/program/ProgramWhyTake';
 import { ProgramFees } from '@/components/program/ProgramFees';
 import { ProgramNotFound } from '@/components/program/ProgramNotFound';
+import { useEffect } from "react";
 
 // Import program data
 import { programsData } from '@/data/programs';
@@ -16,6 +17,10 @@ import { programsData } from '@/data/programs';
 const ProgramDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const program = slug ? programsData[slug as keyof typeof programsData] : null;
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   if (!program) {
     return <ProgramNotFound />;

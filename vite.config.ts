@@ -26,5 +26,8 @@ export default defineConfig(({ mode }) => ({
     assetsInlineLimit: 4096, // 4kb
     // Enable CSS code splitting
     cssCodeSplit: true,
+    css: {
+      postcss: path.resolve(__dirname, "postcss.config.js"),
+    },
   },
 }));

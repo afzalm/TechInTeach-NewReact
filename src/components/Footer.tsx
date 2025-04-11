@@ -4,16 +4,17 @@ import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube, A
 import { LanguageSelector } from './LanguageSelector';
 import logoWebp from '@/assets/logo.webp';
 import logoPng from '@/assets/logo.png';
+import contactInfo from '@/data/contactInfo';
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
   
-  return (
+    return (
     <footer className="border-t border-gray-200 bg-white">
       <div className="container mx-auto px-4 py-12 md:py-16">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div>
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center justify-center py-3">
           <picture>
             <source srcSet={logoWebp} type="image/webp" />
             <img src={logoPng} alt="TechinTeach" className="h-10 w-auto" />
@@ -111,20 +112,28 @@ export const Footer = () => {
           
           <div>
             <h3 className="mb-4 text-lg font-semibold text-gray-900">Contact Information</h3>
-            <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <Mail size={18} className="mt-0.5 text-violet-600 flex-shrink-0" />
-                <a href="mailto:contact@techinteach.com" className="text-gray-600 hover:text-violet-600 transition-colors">
-                  contact@techinteach.com
-                </a>
-              </li>
-              <li className="flex items-start gap-3">
-                <Phone size={18} className="mt-0.5 text-violet-600 flex-shrink-0" />
-                <a href="tel:+918756429310" className="text-gray-600 hover:text-violet-600 transition-colors">
-                  +91 8756 429 310
-                </a>
-              </li>
-              <li className="flex items-start gap-3">
+                        <ul className="space-y-4">
+                            <li className="flex items-start gap-3">
+                                <Mail size={18} className="mt-0.5 text-violet-600 flex-shrink-0" />
+                                <div>
+                                    <a href={`mailto:${contactInfo.email.general}`} className="text-gray-600 hover:text-violet-600 transition-colors block">
+                                        {contactInfo.email.general}
+                                    </a>
+                                    <a href={`mailto:${contactInfo.email.booking}`} className="text-gray-600 hover:text-violet-600 transition-colors block">
+                                        {contactInfo.email.booking}
+                                    </a>
+                                </div>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Phone size={18} className="mt-0.5 text-violet-600 flex-shrink-0" />
+                                <a href={`tel:${contactInfo.call.main}`} className="text-gray-600 hover:text-violet-600 transition-colors block">
+                                    {contactInfo.call.main}
+                                </a>
+                                <a href={`tel:${contactInfo.call.training}`} className="text-gray-600 hover:text-violet-600 transition-colors block">
+                                    {contactInfo.call.training}
+                                </a>
+                            </li>
+                            <li className="flex items-start gap-3">
                 <MapPin size={18} className="mt-0.5 text-violet-600 flex-shrink-0" />
                 <span className="text-gray-600">
                   Kochi, Kerala, India

@@ -39,8 +39,8 @@ const decodeHtmlEntities = (text: string): string => {
 };
 
 // Cache configuration for articles data
-const CACHE_KEY = 'techinteach_articles_cache';
-const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const CACHE_EXPIRY = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+const CACHE_FILE_PATH = 'src/data/articlesCache.json';
 
 const Articles = () => {
   // State management for articles and UI
@@ -61,17 +61,47 @@ const Articles = () => {
      * Handles image loading and error states
      */
     const fetchData = async () => {
-      // Retrieve cached articles data from localStorage, defaulting to empty object if not found
-      const cachedData = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
-      const isCacheValid = cachedData.timestamp && (Date.now() - cachedData.timestamp < CACHE_EXPIRY);
+      let cachedData = null;
+      try {
+        const cacheFileContent = await default_api.read_file(path = CACHE_FILE_PATH);
+        if (cacheFileContent && cacheFileContent.result) {
+          cachedData = JSON.parse(cacheFileContent.result);
+          const isCacheValid = cachedData.timestamp && (Date.now() - cachedData.timestamp < CACHE_EXPIRY);
 
-      if (isCacheValid && cachedData.posts && cachedData.categories) {
-        console.log('Using cached data:', cachedData);
-        setPosts(cachedData.posts);
-        setCategories(cachedData.categories);
-        setLoading(false);
-        return;
+          if (isCacheValid && cachedData.posts && cachedData.categories) {
+            console.log('Using cached data from file:', cachedData);
+            setPosts(cachedData.posts);
+            setCategories(cachedData.categories);
+            setLoading(false);
+            return;
+          } else {
+            console.log('Cache expired or invalid. Fetching new data.');
+          }
+        } else {
+          console.log('Cache file not found or empty. Fetching new data.');
+        }
+      } catch (error) {
+        console.error('Error reading cache file:', error);
+        console.log('Fetching new data.');
       }
+
+      const updateCache = async (posts, categories, timestamp) => {
+        try {
+          const newCacheData = { posts, categories, timestamp };
+          await default_api.natural_language_write_file(
+            language = "json",
+            path = CACHE_FILE_PATH,
+            prompt = `Update the articles cache with the following data: ${JSON.stringify(newCacheData)}`,
+            selected_content = JSON.stringify(newCacheData) // Pass the data as selected_content
+          );
+          console.log('Data cached to file successfully');
+        } catch (cacheError) {
+          console.error('Error writing to cache file:', cacheError);
+        }
+      };
+
+      setLoading(true);
+      console.log('Fetching new data from API');
 
       try {
         // Fetch posts
@@ -84,6 +114,7 @@ const Articles = () => {
           console.error('Posts fetch failed:', postsResponse.status, postsResponse.statusText, 'Response:', text.slice(0, 300));
           throw new Error(`Posts fetch failed: ${postsResponse.status}`);
         }
+
         const postsData = await postsResponse.json();
         console.log('Posts fetched successfully:', postsData);
 
@@ -113,10 +144,13 @@ const Articles = () => {
           featured: post.sticky
         }));
 
-        // Fetch featured images with error handling
+        const MAX_RETRIES = 3;
+        const RETRY_DELAY = 1000;
+
+        // Fetch featured images with retry and fallback
         const postsWithImages = await Promise.all(
           formattedPosts.map(async (post) => {
-            if (post.imageUrl.includes('media')) {
+            let imageUrl = post.imageUrl;
               try {
                 const mediaResponse = await fetch(post.imageUrl, {
                   method: 'GET',
@@ -124,21 +158,36 @@ const Articles = () => {
                 });
                 if (!mediaResponse.ok) {
                   const text = await mediaResponse.text();
-                  console.warn(`Media fetch failed for post ${post.id} (${post.imageUrl}): ${mediaResponse.status} ${mediaResponse.statusText}, Response: ${text.slice(0, 200)}`);
-                  return { ...post, imageUrl: 'https://via.placeholder.com/300' };
+                  console.warn(`Initial media fetch failed for post ${post.id} (${post.imageUrl}): ${mediaResponse.status} ${mediaResponse.statusText}, Response: ${text.slice(0, 200)}`);
+
+                  if (mediaResponse.status === 508) {
+                    let retryCount = 0;
+                    while (retryCount < MAX_RETRIES) {
+                      retryCount++;
+                      console.log(`Retrying media fetch for post ${post.id} (attempt ${retryCount})`);
+                      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+                      const retryResponse = await fetch(post.imageUrl);
+                      if (retryResponse.ok) {
+                        const mediaData = await retryResponse.json();
+                        imageUrl = mediaData.source_url;
+                        break; // Exit retry loop on success
+                      } else {
+                        const retryText = await retryResponse.text();
+                        console.warn(`Retry ${retryCount} failed for post ${post.id}: ${retryResponse.status} ${retryResponse.statusText}, Response: ${retryText.slice(0, 200)}`);
+                      }
+                    }
+                  }
                 }
-                const mediaData = await mediaResponse.json();
-                console.log(`Media fetched for post ${post.id}:`, mediaData.source_url);
-                return { ...post, imageUrl: mediaData.source_url };
+                if (imageUrl === post.imageUrl && mediaResponse.ok) {  // Only update if no retry succeeded and initial fetch was ok
+                  const mediaData = await mediaResponse.json();
+                  imageUrl = mediaData.source_url;
+                }
               } catch (mediaError) {
                 console.warn(`Error fetching media for post ${post.id} (${post.imageUrl}):`, mediaError);
-                return { ...post, imageUrl: 'https://via.placeholder.com/300' };
               }
-            }
-            return post;
+            return { ...post, imageUrl: imageUrl === post.imageUrl ? 'https://via.placeholder.com/300' : imageUrl };  // Use fallback if unchanged
           })
         );
-
         // Map category IDs to names
         const postsWithCategories = postsWithImages.map(post => ({
           ...post,
@@ -148,13 +197,14 @@ const Articles = () => {
         setPosts(postsWithCategories);
         setCategories(categoriesData.map(cat => ({ id: cat.id, name: cat.name, count: cat.count })));
 
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
-          posts: postsWithCategories,
-          categories: categoriesData.map(cat => ({ id: cat.id, name: cat.name, count: cat.count })),
-          timestamp: Date.now()
-        }));
-        console.log('Data cached successfully');
-      } catch (error) {
+        // Update the cache after successful fetch
+        await updateCache(
+          postsWithCategories,
+          categoriesData.map(cat => ({ id: cat.id, name: cat.name, count: cat.count })),
+          Date.now()
+        );
+
+      }  catch (error) {
         console.error('Error fetching blog data:', error);
       } finally {
         setLoading(false);

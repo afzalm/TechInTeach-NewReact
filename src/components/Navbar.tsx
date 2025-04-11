@@ -43,7 +43,7 @@ export const Navbar = () => {
         <Link to="/" className="flex items-center">
           <picture>
             <source srcSet={logoWebp} type="image/webp" />
-            <img src={logoPng} alt="TechinTeach" className="h-10 w-auto" />
+            <img src={logoPng} alt="TechinTeach" className="h-10 object-contain" />
           </picture>
         </Link>
 

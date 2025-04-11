@@ -60,16 +60,42 @@ const Article = () => {
   const [article, setArticle] = useState<Article | null>(null);
   const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const CACHE_EXPIRY = 30 * 24 * 60 * 60 * 1000; // 30 days
 
   useEffect(() => {
-    /**
-     * Fetches article data from WordPress API
-     * Handles featured image loading and error states
-     * Decodes HTML entities in content
-     */
     const fetchArticle = async () => {
       try {
-        console.log('Fetching article with slug:', slug);
+        // 1. Read the cache file
+        let cachedData = null;
+        try {
+          const cacheResponse = await fetch('/src/data/articlesCache.json');
+          if (cacheResponse.ok) {
+            cachedData = await cacheResponse.json();
+          } else {
+            console.warn('Cache file not found or error reading it.');
+          }
+        } catch (error) {
+          console.error('Error reading cache file:', error);
+        }
+
+        // 2. Check if the article exists in the cache and is valid
+        let articleFromCache = null;
+        if (cachedData && cachedData.articles) {
+          const cachedArticle = cachedData.articles.find((a: any) => a.slug === slug);
+          if (cachedArticle && cachedData.timestamp && (Date.now() - cachedData.timestamp < CACHE_EXPIRY)) {
+            articleFromCache = cachedArticle;
+            console.log('Using cached article:', slug);
+          }
+        }
+
+        if (articleFromCache) {            
+            setArticle(articleFromCache);
+          setLoading(false);
+          return;
+        }
+
+        // 3. If not in cache or invalid, fetch from API
+        console.log('Fetching article from API:', slug);
         const response = await fetch(`https://techinteach.com/en/wp-json/wp/v2/posts?slug=${slug}`, {
           method: 'GET',
           headers: { 'Accept': 'application/json' },
@@ -82,8 +108,6 @@ const Article = () => {
         }
 
         const articles = await response.json();
-        console.log('Articles response:', articles);
-
         if (!Array.isArray(articles) || articles.length === 0) {
           console.error('No article found with slug:', slug);
           setLoading(false);
@@ -91,55 +115,75 @@ const Article = () => {
         }
 
         const articleData = articles[0];
-        console.log('Article data:', articleData);
 
-        // Handle featured image loading
-        let imageUrl = 'https://via.placeholder.com/800x400';
+        let imageUrl = '';
         if (articleData.featured_media) {
           try {
-            const mediaResponse = await fetch(`https://techinteach.com/en/wp-json/wp/v2/media/${articleData.featured_media}`, {
-              method: 'GET',
-              headers: { 'Accept': 'application/json' },
-            });
-
-            if (!mediaResponse.ok) {
-              const mediaText = await mediaResponse.text();
-              console.warn(`Media fetch failed for article ${articleData.id}: ${mediaResponse.status} ${mediaResponse.statusText}, Response: ${mediaText.slice(0, 200)}`);
-            } else {
+            const mediaResponse = await fetch(`https://techinteach.com/en/wp-json/wp/v2/media/${articleData.featured_media}`);
+            if (mediaResponse.ok) {
               const mediaData = await mediaResponse.json();
               imageUrl = mediaData.source_url;
-              console.log('Media URL:', imageUrl);
+            } else {
+              console.warn('Error fetching media. Using placeholder.');
+              imageUrl = 'https://via.placeholder.com/300';
             }
-          } catch (mediaError) {
-            console.warn('Error fetching media:', mediaError);
+          } catch (error) {
+            console.error('Error fetching media:', error);
+            imageUrl = 'https://via.placeholder.com/300';
           }
+        } else {
+          imageUrl = 'https://via.placeholder.com/300';
         }
 
-        // Format article data and decode HTML entities
         const formattedArticle = {
           id: articleData.id,
           title: decodeHtmlEntities(articleData.title.rendered),
           content: decodeHtmlEntities(articleData.content.rendered),
-          date: new Date(articleData.date).toLocaleDateString('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric',
-          }),
+          date: new Date(articleData.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
           author: articleData.author,
           category: articleData.categories[0],
           imageUrl,
           excerpt: decodeHtmlEntities(articleData.excerpt.rendered.replace(/<[^>]+>/g, '')),
+          slug: articleData.slug, // Add slug to the formatted article
         };
 
-        console.log('Formatted article:', formattedArticle);
         setArticle(formattedArticle);
+
+        // 4. Update the cache
+        if (cachedData) {
+          // Update existing cache
+          const existingIndex = cachedData.articles.findIndex((a: any) => a.slug === slug);
+          if (existingIndex !== -1) {
+            cachedData.articles[existingIndex] = formattedArticle;
+          } else {
+            cachedData.articles.push(formattedArticle);
+          }
+          cachedData.timestamp = Date.now();
+        } else {
+          // Create new cache
+          cachedData = {
+            articles: [formattedArticle],
+            timestamp: Date.now(),
+          };
+        }
+
+        // Write the updated cache to file
+        try {
+          await fetch('/src/data/articlesCache.json', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(cachedData),
+          });
+          console.log('Article data cached successfully:', slug);
+        } catch (error) {
+          console.error('Error writing to cache file:', error);
+        }
 
         // Related articles logic (simplified, add back if needed)
       } catch (error) {
         console.error('Error fetching article:', error);
-        if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
-          console.error('This is likely a CORS issue. Check server configuration.');
-        }
       } finally {
         setLoading(false);
       }
