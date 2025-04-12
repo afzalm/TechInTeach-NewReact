@@ -1,26 +1,6 @@
-import { useState } from 'react';
-import { 
-  Brain, 
-  Laptop, 
-  BookOpen, 
-  Award, 
-  Globe, 
-  Users,
-  Lightbulb,
-  Shield,
-  Heart,
-  LayoutGrid,
-  Smile,
-  Code,
-  Search,
-  ArrowRight,
-  Star,
-  LineChart,
-  FileText,
-  BarChart,
-  Gamepad2,
-  Presentation
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Brain,Laptop,BookOpen,Award,Globe,Users,Lightbulb,Shield,Heart,LayoutGrid,Code,Search,ArrowRight,Star,LineChart,FileText,BarChart,Gamepad2,Presentation
+  } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { Navbar } from '@/components/Navbar';
@@ -45,53 +25,28 @@ interface Category {
   icon: JSX.Element;
 }
 
-import { programsData } from '@/data/programs';
-
-// Helper function to generate a default icon
-const getDefaultIcon = (slug: string) => {
-  switch (slug) {
-    case "design-thinking": return <Brain size={24} />;
-    case "engaging-classrooms": return <Laptop size={24} />;
-    case "ai-teaching": return <BookOpen size={24} />;
-    case "innovation-ambassador": return <Award size={24} />;
-    case "google-certified": return <Globe size={24} />;
-    case "microsoft-educator": return <Laptop size={24} />;
-    case "apple-teacher": return <Laptop size={24} />;
-    case "adobe-creative": return <Lightbulb size={24} />;
-    case "digital-citizenship": return <Shield size={24} />;
-    case "inclusive-education": return <Heart size={24} />;
-    case "blended-learning": return <LayoutGrid size={24} />;
-    case "assessment-tools": return <LineChart size={24} />;
-    case "online-content": return <FileText size={24} />;
-    case "data-driven": return <BarChart size={24} />;
-    case "teacher-wellness": return <Smile size={24} />;
-    case "computational-thinking": return <Code size={24} />;
-    case "gamification": return <Gamepad2 size={24} />;
-    case "presentation-skills": return <Presentation size={24} />;
-    default: return <Star size={24} />; // Default icon
-  }
+// Helper function to generate a random icon
+const getDefaultIcon = () => {
+  const icons = [
+<Brain size={24} />,
+<Laptop size={24} />,
+<BookOpen size={24} />,
+<Award size={24} />,
+<Globe size={24} />,
+<Lightbulb size={24} />,
+<Shield size={24} />,
+<Heart size={24} />,
+<LayoutGrid size={24} />,
+<LineChart size={24} />,
+<FileText size={24} />,
+<BarChart size={24} />,
+<Code size={24} />,
+<Gamepad2 size={24} />,
+<Presentation size={24} />,
+<Star size={24} />
+  ];
+  return icons[Math.floor(Math.random() * icons.length)];
 };
-
-// Create a temporary array with basic program data
-const tempPrograms: { title: string; description: string; slug: string; image: string }[] = 
-  Object.entries(programsData).map(([slug, data]) => ({
-    title: data.title,
-    description: data.description,
-    slug,
-    image: data.image,
-  }));
-
-// Map over the temporary array to add icon, category, and featured properties
-const programs: Program[] = tempPrograms.map(program => {
-  const { slug } = program;
-  const originalData = (tempPrograms as any[]).find(p => p.slug === slug) || {};
-  return {
-    ...program,
-    icon: originalData.icon || getDefaultIcon(slug),
-    category: originalData.category || "general",
-    featured: originalData.featured || false,
-  };
-});
 
 const categories: Category[] = [
   { name: "All Programs", value: "all", icon: <Star size={16} /> },
@@ -203,9 +158,36 @@ const SpecialOfferCard = ({
 
 // Main Component
 const Programs = () => {
+  const [programs, setPrograms] = useState<Program[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
-  
+
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        const response = await fetch("/data/programs.json");
+        const programsData = await response.json();
+
+        // Map over the fetched data to add icons and other properties
+        const mappedPrograms = Object.entries(programsData).map(([slug, data]: any) => ({
+          title: data.title,
+          description: data.description,
+          slug,
+          image: data.image,
+          icon: getDefaultIcon(slug),
+          category: data.category || "general",
+          featured: data.featured || false,
+        }));
+
+        setPrograms(mappedPrograms);
+      } catch (error) {
+        console.error("Error fetching programs data:", error);
+      }
+    };
+
+    fetchPrograms();
+  }, []);
+
   const filteredPrograms = programs.filter(program => {
     const matchesSearch = program.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          program.description.toLowerCase().includes(searchQuery.toLowerCase());

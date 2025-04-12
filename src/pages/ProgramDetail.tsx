@@ -1,4 +1,4 @@
-
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -9,19 +9,26 @@ import { ProgramOutcomes } from '@/components/program/ProgramOutcomes';
 import { ProgramWhyTake } from '@/components/program/ProgramWhyTake';
 import { ProgramFees } from '@/components/program/ProgramFees';
 import { ProgramNotFound } from '@/components/program/ProgramNotFound';
-import { useEffect } from "react";
-
-// Import program data
-import { programsData } from '@/data/programs';
 
 const ProgramDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const program = slug ? programsData[slug as keyof typeof programsData] : null;
+  const [program, setProgram] = useState(null);
 
   useEffect(() => {
+    const fetchProgram = async () => {
+      try {
+        const response = await fetch("/data/programs.json");
+        const programsData = await response.json();
+        setProgram(programsData[slug]);
+      } catch (error) {
+        console.error("Error fetching program data:", error);
+      }
+    };
+
+    fetchProgram();
     window.scrollTo(0, 0);
-  }, []);
-  
+  }, [slug]);
+
   if (!program) {
     return <ProgramNotFound />;
   }

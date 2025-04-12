@@ -1,7 +1,6 @@
 
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Youtube, Award } from 'lucide-react';
-import { LanguageSelector } from './LanguageSelector';
 import logoWebp from '@/assets/logo.webp';
 import logoPng from '@/assets/logo.png';
 import contactInfo from '@/data/contactInfo';
@@ -30,19 +29,19 @@ export const Footer = () => {
               </p>
             </div>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-500 hover:text-violet-600 transition-colors">
+              <a href={`${contactInfo.social.facebook}`} className="text-gray-500 hover:text-violet-600 transition-colors">
                 <Facebook size={20} />
               </a>
-              <a href="#" className="text-gray-500 hover:text-violet-600 transition-colors">
+              <a href={`${contactInfo.social.x}`} className="text-gray-500 hover:text-violet-600 transition-colors">
                 <Twitter size={20} />
               </a>
-              <a href="#" className="text-gray-500 hover:text-violet-600 transition-colors">
+              <a href={`${contactInfo.social.instagram}`} className="text-gray-500 hover:text-violet-600 transition-colors">
                 <Instagram size={20} />
               </a>
-              <a href="#" className="text-gray-500 hover:text-violet-600 transition-colors">
+              <a href={`${contactInfo.social.linkedin}`} className="text-gray-500 hover:text-violet-600 transition-colors">
                 <Linkedin size={20} />
               </a>
-              <a href="#" className="text-gray-500 hover:text-violet-600 transition-colors">
+              <a href={`${contactInfo.social.youtube}`} className="text-gray-500 hover:text-violet-600 transition-colors">
                 <Youtube size={20} />
               </a>
             </div>
@@ -119,9 +118,6 @@ export const Footer = () => {
                                     <a href={`mailto:${contactInfo.email.general}`} className="text-gray-600 hover:text-violet-600 transition-colors block">
                                         {contactInfo.email.general}
                                     </a>
-                                    <a href={`mailto:${contactInfo.email.booking}`} className="text-gray-600 hover:text-violet-600 transition-colors block">
-                                        {contactInfo.email.booking}
-                                    </a>
                                 </div>
                             </li>
                             <li className="flex items-start gap-3">
@@ -129,20 +125,12 @@ export const Footer = () => {
                                 <a href={`tel:${contactInfo.call.main}`} className="text-gray-600 hover:text-violet-600 transition-colors block">
                                     {contactInfo.call.main}
                                 </a>
-                                <a href={`tel:${contactInfo.call.training}`} className="text-gray-600 hover:text-violet-600 transition-colors block">
-                                    {contactInfo.call.training}
-                                </a>
                             </li>
                             <li className="flex items-start gap-3">
                 <MapPin size={18} className="mt-0.5 text-violet-600 flex-shrink-0" />
                 <span className="text-gray-600">
-                  Kochi, Kerala, India
+                  {contactInfo.address.simple}
                 </span>
-              </li>
-              <li className="pt-4">
-                <div className="flex items-center gap-2 text-gray-700">
-                  <LanguageSelector />
-                </div>
               </li>
             </ul>
           </div>

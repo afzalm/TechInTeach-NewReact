@@ -218,7 +218,7 @@ const Contact = () => {
       {/* Map Section - For illustration only */}
       <section className="py-12 px-4 md:py-16 bg-gray-50">
         <div className="container mx-auto">
-          <div className="max-w-4xl mx-auto">
+          {/* <div className="max-w-4xl mx-auto">
             <div className="aspect-video rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden">
               <div className="h-full w-full bg-gray-200 flex items-center justify-center text-gray-500">
                 <div className="text-center">
@@ -227,7 +227,7 @@ const Contact = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
           <div className="mt-8 rounded-xl bg-white p-6 border border-gray-100 shadow-sm">
                 <h3 className="text-lg font-medium mb-4 text-gray-900">Quick Actions</h3>
                 
