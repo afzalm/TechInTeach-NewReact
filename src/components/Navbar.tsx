@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Globe, ChevronDown } from 'lucide-react';
-import { LanguageSelector } from './LanguageSelector';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import logoWebp from '@/assets/logo.webp';
@@ -65,7 +64,6 @@ export const Navbar = () => {
               </li>
             ))}
           </ul>
-          <LanguageSelector />
           <Link 
             to="/booking" 
             className="rounded-full bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700 hover:shadow-md"

@@ -6,8 +6,8 @@ import Booking from './pages/Booking';
 import Contact from './pages/Contact';
 import Articles from './pages/Articles';
 import Article from './pages/Article';
-import AITools from './pages/AITools';
-import AIToolDetail from './pages/AIToolDetail';
+// import AITools from './pages/AITools';
+// import AIToolDetail from './pages/AIToolDetail';
 import Mentoring from './pages/Mentoring';
 import NotFound from './pages/NotFound';
 

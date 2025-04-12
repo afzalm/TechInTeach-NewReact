@@ -1,14 +1,7 @@
 /**
  * Articles Component
  * 
- * This component displays a list of articles fetched from the WordPress API.
- * Features include:
- * - Article listing with featured articles
- * - Search functionality
- * - Category filtering
- * - Monthly archives
- * - Responsive sidebar for mobile
- * - Pagination
+ * Presents a list of articles with search, filtering, and pagination functionality
  */
 
 import { useState, useEffect } from 'react';
@@ -25,25 +18,10 @@ import {
   PaginationNext, 
   PaginationPrevious 
 } from '@/components/ui/pagination';
-
-/**
- * Utility function to decode HTML entities in text
- * Creates a temporary textarea element to handle the decoding
- * @param text - The text containing HTML entities to decode
- * @returns The decoded text
- */
-const decodeHtmlEntities = (text: string): string => {
-  const textarea = document.createElement('textarea');
-  textarea.innerHTML = text;
-  return textarea.value;
-};
-
-// Cache configuration for articles data
-const CACHE_EXPIRY = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
-const CACHE_FILE_PATH = 'src/data/articlesCache.json';
+import { fetchArticlesData } from '@/components/articlesData';
 
 const Articles = () => {
-  // State management for articles and UI
+  // State management
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,169 +33,23 @@ const Articles = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    /**
-     * Fetches articles and categories from the WordPress API
-     * Implements caching to reduce API calls
-     * Handles image loading and error states
-     */
-    const fetchData = async () => {
-      let cachedData = null;
-      try {
-        const cacheFileContent = await default_api.read_file(path = CACHE_FILE_PATH);
-        if (cacheFileContent && cacheFileContent.result) {
-          cachedData = JSON.parse(cacheFileContent.result);
-          const isCacheValid = cachedData.timestamp && (Date.now() - cachedData.timestamp < CACHE_EXPIRY);
-
-          if (isCacheValid && cachedData.posts && cachedData.categories) {
-            console.log('Using cached data from file:', cachedData);
-            setPosts(cachedData.posts);
-            setCategories(cachedData.categories);
-            setLoading(false);
-            return;
-          } else {
-            console.log('Cache expired or invalid. Fetching new data.');
-          }
-        } else {
-          console.log('Cache file not found or empty. Fetching new data.');
-        }
-      } catch (error) {
-        console.error('Error reading cache file:', error);
-        console.log('Fetching new data.');
-      }
-
-      const updateCache = async (posts, categories, timestamp) => {
-        try {
-          const newCacheData = { posts, categories, timestamp };
-          await default_api.natural_language_write_file(
-            language = "json",
-            path = CACHE_FILE_PATH,
-            prompt = `Update the articles cache with the following data: ${JSON.stringify(newCacheData)}`,
-            selected_content = JSON.stringify(newCacheData) // Pass the data as selected_content
-          );
-          console.log('Data cached to file successfully');
-        } catch (cacheError) {
-          console.error('Error writing to cache file:', cacheError);
-        }
-      };
-
+    const loadData = async () => {
       setLoading(true);
-      console.log('Fetching new data from API');
-
       try {
-        // Fetch posts
-        const postsResponse = await fetch('https://techinteach.com/en/wp-json/wp/v2/posts?per_page=100', {
-          method: 'GET',
-          headers: { 'Accept': 'application/json' }
-        });
-        if (!postsResponse.ok) {
-          const text = await postsResponse.text();
-          console.error('Posts fetch failed:', postsResponse.status, postsResponse.statusText, 'Response:', text.slice(0, 300));
-          throw new Error(`Posts fetch failed: ${postsResponse.status}`);
-        }
-
-        const postsData = await postsResponse.json();
-        console.log('Posts fetched successfully:', postsData);
-
-        // Fetch categories
-        const categoriesResponse = await fetch('https://techinteach.com/en/wp-json/wp/v2/categories', {
-          method: 'GET',
-          headers: { 'Accept': 'application/json' }
-        });
-        if (!categoriesResponse.ok) {
-          const text = await categoriesResponse.text();
-          console.error('Categories fetch failed:', categoriesResponse.status, categoriesResponse.statusText, 'Response:', text.slice(0, 200));
-          throw new Error(`Categories fetch failed: ${categoriesResponse.status}`);
-        }
-        const categoriesData = await categoriesResponse.json();
-        console.log('Categories fetched successfully:', categoriesData);
-
-        // Map posts to desired format with HTML entity decoding
-        const formattedPosts = postsData.map(post => ({
-          id: post.id,
-          title: decodeHtmlEntities(post.title.rendered),
-          excerpt: decodeHtmlEntities(post.excerpt.rendered.replace(/<[^>]+>/g, '')),
-          date: new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-          author: post.author,
-          category: post.categories[0],
-          slug: post.slug,
-          imageUrl: post.featured_media ? `https://techinteach.com/en/wp-json/wp/v2/media/${post.featured_media}` : 'https://via.placeholder.com/300',
-          featured: post.sticky
-        }));
-
-        const MAX_RETRIES = 3;
-        const RETRY_DELAY = 1000;
-
-        // Fetch featured images with retry and fallback
-        const postsWithImages = await Promise.all(
-          formattedPosts.map(async (post) => {
-            let imageUrl = post.imageUrl;
-              try {
-                const mediaResponse = await fetch(post.imageUrl, {
-                  method: 'GET',
-                  headers: { 'Accept': 'application/json' }
-                });
-                if (!mediaResponse.ok) {
-                  const text = await mediaResponse.text();
-                  console.warn(`Initial media fetch failed for post ${post.id} (${post.imageUrl}): ${mediaResponse.status} ${mediaResponse.statusText}, Response: ${text.slice(0, 200)}`);
-
-                  if (mediaResponse.status === 508) {
-                    let retryCount = 0;
-                    while (retryCount < MAX_RETRIES) {
-                      retryCount++;
-                      console.log(`Retrying media fetch for post ${post.id} (attempt ${retryCount})`);
-                      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-                      const retryResponse = await fetch(post.imageUrl);
-                      if (retryResponse.ok) {
-                        const mediaData = await retryResponse.json();
-                        imageUrl = mediaData.source_url;
-                        break; // Exit retry loop on success
-                      } else {
-                        const retryText = await retryResponse.text();
-                        console.warn(`Retry ${retryCount} failed for post ${post.id}: ${retryResponse.status} ${retryResponse.statusText}, Response: ${retryText.slice(0, 200)}`);
-                      }
-                    }
-                  }
-                }
-                if (imageUrl === post.imageUrl && mediaResponse.ok) {  // Only update if no retry succeeded and initial fetch was ok
-                  const mediaData = await mediaResponse.json();
-                  imageUrl = mediaData.source_url;
-                }
-              } catch (mediaError) {
-                console.warn(`Error fetching media for post ${post.id} (${post.imageUrl}):`, mediaError);
-              }
-            return { ...post, imageUrl: imageUrl === post.imageUrl ? 'https://via.placeholder.com/300' : imageUrl };  // Use fallback if unchanged
-          })
-        );
-        // Map category IDs to names
-        const postsWithCategories = postsWithImages.map(post => ({
-          ...post,
-          category: categoriesData.find(cat => cat.id === post.category)?.name || 'Uncategorized'
-        }));
-
-        setPosts(postsWithCategories);
-        setCategories(categoriesData.map(cat => ({ id: cat.id, name: cat.name, count: cat.count })));
-
-        // Update the cache after successful fetch
-        await updateCache(
-          postsWithCategories,
-          categoriesData.map(cat => ({ id: cat.id, name: cat.name, count: cat.count })),
-          Date.now()
-        );
-
-      }  catch (error) {
-        console.error('Error fetching blog data:', error);
+        const { posts, categories } = await fetchArticlesData();
+        setPosts(posts);
+        setCategories(categories);
+      } catch (error) {
+        console.error('Failed to load articles:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    loadData();
   }, []);
 
-  /**
-   * Filters posts based on search query, category, and month
-   * Applies all filters simultaneously
-   */
+  // Filter posts based on search, category, and month
   const filteredPosts = posts.filter(post => {
     const matchesSearch = 
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -228,29 +60,17 @@ const Articles = () => {
     return matchesSearch && matchesCategory && matchesMonth;
   });
 
-  /**
-   * Pagination logic
-   * Calculates current page's posts and total number of pages
-   */
+  // Pagination logic
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
 
-  /**
-   * Handles page navigation
-   * Scrolls to top when changing pages
-   */
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
     window.scrollTo(0, 0);
   };
 
-  /**
-   * Renders pagination items
-   * Creates numbered page buttons based on total pages
-   * @returns Array of PaginationItem components
-   */
   const renderPaginationItems = () => {
     const items = [];
     for (let i = 1; i <= totalPages; i++) {
@@ -268,12 +88,9 @@ const Articles = () => {
     return items;
   };
 
-  /**
-   * Generates monthly archive counts
-   * Groups posts by month and year
-   */
+  // Generate monthly archive counts
   const getMonthlyCounts = () => {
-    const counts: Record<string, number> = {};
+    const counts = {};
     posts.forEach(post => {
       const date = new Date(post.date);
       const monthYear = `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;

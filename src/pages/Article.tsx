@@ -125,14 +125,14 @@ const Article = () => {
               imageUrl = mediaData.source_url;
             } else {
               console.warn('Error fetching media. Using placeholder.');
-              imageUrl = 'https://via.placeholder.com/300';
+              imageUrl = 'https://techinteach.com/images/default-article.jpg?v=300';
             }
           } catch (error) {
             console.error('Error fetching media:', error);
-            imageUrl = 'https://via.placeholder.com/300';
+            imageUrl = 'https://techinteach.com/images/default-article.jpg?v=300';
           }
         } else {
-          imageUrl = 'https://via.placeholder.com/300';
+          imageUrl = 'https://techinteach.com/images/default-article.jpg?v=300';
         }
 
         const formattedArticle = {
