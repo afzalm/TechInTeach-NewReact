@@ -14,6 +14,7 @@ import {
   Cpu,
   BadgeCheck
 } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 import { Navbar } from '@/components/Navbar';
 import { Hero } from '@/components/Hero';
@@ -107,6 +108,12 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen">
+      <Helmet>
+        <title>Home | TechInTeach</title>
+        <meta name="description" content="TechInTeach offers professional development programs for modern educators." />
+        <link rel="canonical" href="https://techinteach.com/" />
+        {/* Add Open Graph, Twitter Cards, etc., as needed */}
+      </Helmet>
       <InteractiveBackground />
       <Navbar />
       <Hero />

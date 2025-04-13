@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Globe, ChevronDown } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Menu, X, Globe } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import logoWebp from '@/assets/logo.webp';
 import logoPng from '@/assets/logo.png';
@@ -81,19 +80,19 @@ export const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation - Updated */}
       {isOpen && (
-        <div className="md:hidden bg-white border-t">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex flex-col space-y-4">
+        <div className="md:hidden fixed inset-0 top-[72px] bg-white z-50 overflow-y-auto">
+          <div className="container mx-auto px-4 py-4 min-h-[calc(100vh-72px)] flex flex-col">
+            <ul className="flex-1 space-y-2">
               {navLinks.map((link) => (
-                <li key={link.path}>
+                <li key={link.path} className="list-none">
                   <Link 
                     to={link.path}
-                    className={`block py-2 text-base font-medium ${
+                    className={`block px-4 py-3 text-base font-medium rounded-lg transition-colors ${
                       location.pathname === link.path
-                        ? 'text-blue-700'
-                        : 'text-gray-600'
+                        ? 'text-blue-700 bg-blue-50'
+                        : 'text-gray-600 hover:bg-gray-50'
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
@@ -101,15 +100,13 @@ export const Navbar = () => {
                   </Link>
                 </li>
               ))}
-            </div>
-            <div className="p-4 border-t mt-auto">
-              <div className="flex items-center gap-2 mb-4">
-                <Globe size={18} className="text-gray-500" />
-                <LanguageSelector />
-              </div>
+            </ul>
+            
+            <div className="mt-auto border-t pt-4">
               <Link 
                 to="/booking" 
-                className="block w-full rounded-full bg-blue-600 px-5 py-2.5 text-center text-base font-medium text-white transition-all hover:bg-blue-700"
+                className="block w-full rounded-lg bg-blue-600 px-5 py-3 text-center text-base font-medium text-white transition-all hover:bg-blue-700"
+                onClick={() => setIsOpen(false)}
               >
                 Book Now
               </Link>

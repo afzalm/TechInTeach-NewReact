@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Brain,Laptop,BookOpen,Award,Globe,Users,Lightbulb,Shield,Heart,LayoutGrid,Code,Search,ArrowRight,Star,LineChart,FileText,BarChart,Gamepad2,Presentation
   } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -200,95 +201,104 @@ const Programs = () => {
   });
 
   return (
-    <PageBackground>
-      <Navbar />
+    <>
+      <Helmet>
+        <title>Programs | TechInTeach</title>
+        <meta name="description" content="Browse our professional development training programs for modern educators." />
+        <link rel="canonical" href="https://techinteach.com/programs" />
+        {/* You can add Open Graph and Twitter meta tags here as needed */}
+      </Helmet>
       
-      {/* Hero Section */}
-      <section className="pt-28 pb-16 md:pt-32 md:pb-20 bg-gradient-to-b from-blue-50 to-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="heading-1 mb-6 text-gray-900">
-              Professional Development Programs
-            </h1>
-            <p className="text-lg text-gray-600 mb-8">
-              Enhance your teaching skills with our specialized training programs designed for modern educators.
-            </p>
-            <SearchBar value={searchQuery} onChange={setSearchQuery} />
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Programs */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="container mx-auto">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Featured Programs</h2>
-            <p className="text-gray-600">Our most popular training programs for educators</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            { programs
-              .filter(program => program.featured)
-              .map((program, index) => (
-                <ProgramCard key={index} program={program} />
-              ))}
-          </div>
-        </div>
-      </section>
-      
-      {/* All Programs Section */}
-      <section className="py-16 px-4 ">
-        <div className="container mx-auto">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">All Programs</h2>
-            <p className="text-gray-600">Browse our complete catalog of training programs</p>
-          </div>
-
-          <CategoryFilter 
-            categories={categories} 
-            activeCategory={activeCategory} 
-            onSelect={setActiveCategory} 
-          />
-          
-          {filteredPrograms.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl">
-              <h3 className="text-xl font-semibold mb-2">No programs found</h3>
-              <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+      <PageBackground>
+        <Navbar />
+        
+        {/* Hero Section */}
+        <section className="pt-28 pb-16 md:pt-32 md:pb-20 bg-gradient-to-b from-blue-50 to-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center">
+              <h1 className="heading-1 mb-6 text-gray-900">
+                Professional Development Programs
+              </h1>
+              <p className="text-lg text-gray-600 mb-8">
+                Enhance your teaching skills with our specialized training programs designed for modern educators.
+              </p>
+              <SearchBar value={searchQuery} onChange={setSearchQuery} />
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredPrograms.map((program, index) => (
-                <ProgramCard key={index} program={program} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Special Offers Section */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <SpecialOfferCard
-              title="Bundle Discount"
-              description="Get a 30% discount when you register for 3 or more programs."
-              icon={<Award size={24} />}
-              link="/contact"
-              gradient="from-blue-50 to-blue-100"
-            />
-            <SpecialOfferCard
-              title="1:1 Mentoring"
-              description="Get personalized attention with our exclusive one-to-one mentoring program."
-              icon={<Users size={24} />}
-              link="/mentoring"
-              gradient="from-purple-50 to-purple-100"
-            />
           </div>
-        </div>
-      </section>
-      
-      <Footer />
-    </PageBackground>
+        </section>
+
+        {/* Featured Programs */}
+        <section className="py-16 px-4 bg-gray-50">
+          <div className="container mx-auto">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Featured Programs</h2>
+              <p className="text-gray-600">Our most popular training programs for educators</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              { programs
+                .filter(program => program.featured)
+                .map((program, index) => (
+                  <ProgramCard key={index} program={program} />
+                ))}
+            </div>
+          </div>
+        </section>
+        
+        {/* All Programs Section */}
+        <section className="py-16 px-4 ">
+          <div className="container mx-auto">
+            <div className="max-w-3xl mx-auto text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">All Programs</h2>
+              <p className="text-gray-600">Browse our complete catalog of training programs</p>
+            </div>
+
+            <CategoryFilter 
+              categories={categories} 
+              activeCategory={activeCategory} 
+              onSelect={setActiveCategory} 
+            />
+            
+            {filteredPrograms.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-xl">
+                <h3 className="text-xl font-semibold mb-2">No programs found</h3>
+                <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredPrograms.map((program, index) => (
+                  <ProgramCard key={index} program={program} />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Special Offers Section */}
+        <section className="py-16 px-4">
+          <div className="container mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <SpecialOfferCard
+                title="Bundle Discount"
+                description="Get a 30% discount when you register for 3 or more programs."
+                icon={<Award size={24} />}
+                link="/contact"
+                gradient="from-blue-50 to-blue-100"
+              />
+              <SpecialOfferCard
+                title="1:1 Mentoring"
+                description="Get personalized attention with our exclusive one-to-one mentoring program."
+                icon={<Users size={24} />}
+                link="/mentoring"
+                gradient="from-purple-50 to-purple-100"
+              />
+            </div>
+          </div>
+        </section>
+        
+        <Footer />
+      </PageBackground>
+    </>
   );
 };
 
